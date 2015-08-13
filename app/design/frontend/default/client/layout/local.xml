@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<layout>
+  <catalog_category_view>
+    <reference name="before_body_end">
+      <block type="page/html_head" name="customJs" as="customJs" after="-" template="customJs.phtml">
+          <action method="addItem"><type>skin_js</type><name>js/catalog-category-view.js</name></action>
+      </block>
+    </reference>
+  </catalog_category_view>
+  <cms_index_index>
+    <reference name="before_body_end">
+      <block type="page/html_head" name="customJs" as="customJs" after="-" template="customJs.phtml">
+          <action method="addItem"><type>skin_js</type><name>js/cms-index-index.js</name></action>
+      </block>
+    </reference>
+  </cms_index_index>
+</layout>
