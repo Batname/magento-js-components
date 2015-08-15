@@ -48,72 +48,24 @@
   
   function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
   
-  var _lodash = __webpack_require__(2);
+  var _lodash = __webpack_require__(1);
   
   var _lodash2 = _interopRequireDefault(_lodash);
   
-  var _componentsCommonAddToCartButton = __webpack_require__(1);
+  var _componentsCommonAddToCartButton = __webpack_require__(4);
   
   var _componentsCommonAddToCartButton2 = _interopRequireDefault(_componentsCommonAddToCartButton);
+  
+  var MagentoClient = __webpack_require__(2)();
   
   var buttons = document.querySelectorAll('[data-add-to-cart-button]');
   
   _lodash2['default'].forEach(buttons, function (e) {
-    return new _componentsCommonAddToCartButton2['default']({ elem: e });
+    return MagentoClient.createComponent(_componentsCommonAddToCartButton2['default'], { elem: e });
   });
 
 /***/ },
 /* 1 */
-/***/ function(module, exports, __webpack_require__) {
-
-  'use strict';
-  
-  Object.defineProperty(exports, '__esModule', {
-    value: true
-  });
-  
-  var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-  
-  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-  
-  function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
-  
-  var _lodash = __webpack_require__(2);
-  
-  var _lodash2 = _interopRequireDefault(_lodash);
-  
-  var text = undefined;
-  
-  var AddToCartButton = (function () {
-    function AddToCartButton(options) {
-      _classCallCheck(this, AddToCartButton);
-  
-      _lodash2['default'].assign(this, options);
-      this.elem.addEventListener('mouseover', this.mouseover.bind(this));
-      this.elem.addEventListener('mouseout', this.mouseout.bind(this));
-      text = this.elem.children[0].children[0].innerText;
-    }
-  
-    _createClass(AddToCartButton, [{
-      key: 'mouseover',
-      value: function mouseover() {
-        this.elem.children[0].children[0].innerText = 'mouseover';
-      }
-    }, {
-      key: 'mouseout',
-      value: function mouseout() {
-        this.elem.children[0].children[0].innerText = text;
-      }
-    }]);
-  
-    return AddToCartButton;
-  })();
-  
-  exports['default'] = AddToCartButton;
-  module.exports = exports['default'];
-
-/***/ },
-/* 2 */
 /***/ function(module, exports, __webpack_require__) {
 
   var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(module, global) {/**
@@ -12471,6 +12423,42 @@
   /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)(module), (function() { return this; }())))
 
 /***/ },
+/* 2 */
+/***/ function(module, exports, __webpack_require__) {
+
+  'use strict';
+  
+  Object.defineProperty(exports, '__esModule', {
+    value: true
+  });
+  
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+  
+  var _lodash = __webpack_require__(1);
+  
+  var _lodash2 = _interopRequireDefault(_lodash);
+  
+  exports['default'] = function () {
+    var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+  
+    var componentCounter = 0;
+    var components = [];
+  
+    var createComponent = function createComponent(constructor, options) {
+      var count = componentCounter++;
+      var hiddehOptions = { count: count, hash: _lodash2['default'].uniqueId('component_' + count + '_'), componentName: constructor.name };
+      components.push(hiddehOptions);
+      return new constructor(_lodash2['default'].assign(options, hiddehOptions));
+    };
+  
+    return {
+      createComponent: createComponent
+    };
+  };
+  
+  module.exports = exports['default'];
+
+/***/ },
 /* 3 */
 /***/ function(module, exports) {
 
@@ -12485,6 +12473,550 @@
   	return module;
   }
 
+
+/***/ },
+/* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
+  'use strict';
+  
+  Object.defineProperty(exports, '__esModule', {
+    value: true
+  });
+  
+  var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+  
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+  
+  function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+  
+  var _lodash = __webpack_require__(1);
+  
+  var _lodash2 = _interopRequireDefault(_lodash);
+  
+  var _AddToCartButtonScss = __webpack_require__(9);
+  
+  var _AddToCartButtonScss2 = _interopRequireDefault(_AddToCartButtonScss);
+  
+  var _AddToCartButtonJade = __webpack_require__(11);
+  
+  var _AddToCartButtonJade2 = _interopRequireDefault(_AddToCartButtonJade);
+  
+  var _actionsCommonActions = __webpack_require__(6);
+  
+  var _actionsCommonActions2 = _interopRequireDefault(_actionsCommonActions);
+  
+  var _decoratorsWithStyles = __webpack_require__(7);
+  
+  var _decoratorsWithStyles2 = _interopRequireDefault(_decoratorsWithStyles);
+  
+  var CommonStore = __webpack_require__(8)();
+  
+  var AddToCartButton = (function () {
+    function AddToCartButton(options) {
+      _classCallCheck(this, _AddToCartButton);
+  
+      _lodash2['default'].assign(this, options);
+      this.elem.onclick = null;
+      this.elem.addEventListener('click', this.click.bind(this));
+      CommonStore.changeEvent(this);
+    }
+  
+    _createClass(AddToCartButton, [{
+      key: 'click',
+      value: function click() {
+        _actionsCommonActions2['default'].addToCart(this);
+      }
+    }, {
+      key: 'render',
+      value: function render() {
+        this.elem.innerHTML = (0, _AddToCartButtonJade2['default'])(this);
+      }
+    }]);
+  
+    var _AddToCartButton = AddToCartButton;
+    AddToCartButton = (0, _decoratorsWithStyles2['default'])(_AddToCartButtonScss2['default'])(AddToCartButton) || AddToCartButton;
+    return AddToCartButton;
+  })();
+  
+  exports['default'] = AddToCartButton;
+  module.exports = exports['default'];
+
+/***/ },
+/* 5 */
+/***/ function(module, exports) {
+
+  'use strict';
+  
+  Object.defineProperty(exports, '__esModule', {
+    value: true
+  });
+  exports['default'] = {
+    'ADD_TO_CART': 'ADD_TO_CART'
+  };
+  module.exports = exports['default'];
+
+/***/ },
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
+  'use strict';
+  
+  Object.defineProperty(exports, '__esModule', {
+    value: true
+  });
+  
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+  
+  var _constantsCommonConstants = __webpack_require__(5);
+  
+  var _constantsCommonConstants2 = _interopRequireDefault(_constantsCommonConstants);
+  
+  var CommonActions = {
+    addToCart: function addToCart(component) {
+      var event = new CustomEvent(_constantsCommonConstants2['default'].ADD_TO_CART, {
+        detail: component
+      });
+  
+      document.dispatchEvent(event);
+    }
+  };
+  
+  exports['default'] = CommonActions;
+  module.exports = exports['default'];
+
+/***/ },
+/* 7 */
+/***/ function(module, exports) {
+
+  'use strict';
+  
+  Object.defineProperty(exports, '__esModule', {
+    value: true
+  });
+  
+  function withStyles(styles) {
+    return function () {
+  
+      var style = undefined;
+      style = document.createElement('style');
+      style.setAttribute('type', 'text/css');
+      style.innerHTML = styles.toString();
+      document.getElementsByTagName('head')[0].appendChild(style);
+    };
+  }
+  
+  exports['default'] = withStyles;
+  module.exports = exports['default'];
+
+/***/ },
+/* 8 */
+/***/ function(module, exports, __webpack_require__) {
+
+  'use strict';
+  
+  Object.defineProperty(exports, '__esModule', {
+    value: true
+  });
+  
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+  
+  var _constantsCommonConstants = __webpack_require__(5);
+  
+  var _constantsCommonConstants2 = _interopRequireDefault(_constantsCommonConstants);
+  
+  var CHANGE = 'CHANGE';
+  var events = [];
+  
+  var CommonStore = {
+  
+    changeEvent: function changeEvent(component) {
+  
+      var eventName = CHANGE + '_' + component.componentName;
+  
+      var newEvent = new CustomEvent(eventName, {
+        detail: component
+      });
+  
+      component.elem.addEventListener(eventName, function (event) {
+        alert(event.detail);
+      }, false);
+  
+      events.push(newEvent);
+    }
+  };
+  
+  exports['default'] = function () {
+    document.addEventListener(_constantsCommonConstants2['default'].ADD_TO_CART, function () {
+      events.each(function (event) {
+        return event.detail.render();
+      });
+    }, false);
+  
+    return CommonStore;
+  };
+  
+  module.exports = exports['default'];
+
+/***/ },
+/* 9 */
+/***/ function(module, exports, __webpack_require__) {
+
+  exports = module.exports = __webpack_require__(10)();
+  // imports
+  
+  
+  // module
+  exports.push([module.id, ".btn-cart {\n  border: 3px solid black !important; }\n", ""]);
+  
+  // exports
+
+
+/***/ },
+/* 10 */
+/***/ function(module, exports) {
+
+  /*
+  	MIT License http://www.opensource.org/licenses/mit-license.php
+  	Author Tobias Koppers @sokra
+  */
+  // css base code, injected by the css-loader
+  module.exports = function() {
+  	var list = [];
+  
+  	// return the list of modules as css string
+  	list.toString = function toString() {
+  		var result = [];
+  		for(var i = 0; i < this.length; i++) {
+  			var item = this[i];
+  			if(item[2]) {
+  				result.push("@media " + item[2] + "{" + item[1] + "}");
+  			} else {
+  				result.push(item[1]);
+  			}
+  		}
+  		return result.join("");
+  	};
+  
+  	// import a list of modules into the list
+  	list.i = function(modules, mediaQuery) {
+  		if(typeof modules === "string")
+  			modules = [[null, modules, ""]];
+  		var alreadyImportedModules = {};
+  		for(var i = 0; i < this.length; i++) {
+  			var id = this[i][0];
+  			if(typeof id === "number")
+  				alreadyImportedModules[id] = true;
+  		}
+  		for(i = 0; i < modules.length; i++) {
+  			var item = modules[i];
+  			// skip already imported module
+  			// this implementation is not 100% perfect for weird media query combinations
+  			//  when a module is imported multiple times with different media queries.
+  			//  I hope this will never occur (Hey this way we have smaller bundles)
+  			if(typeof item[0] !== "number" || !alreadyImportedModules[item[0]]) {
+  				if(mediaQuery && !item[2]) {
+  					item[2] = mediaQuery;
+  				} else if(mediaQuery) {
+  					item[2] = "(" + item[2] + ") and (" + mediaQuery + ")";
+  				}
+  				list.push(item);
+  			}
+  		}
+  	};
+  	return list;
+  };
+
+
+/***/ },
+/* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
+  var jade = __webpack_require__(12);
+  
+  module.exports = function template(locals) {
+  var jade_debug = [ new jade.DebugItem( 1, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/AddToCartButton.jade" ) ];
+  try {
+  var buf = [];
+  var jade_mixins = {};
+  var jade_interp;
+  ;var locals_for_with = (locals || {});(function (hash) {
+  jade_debug.unshift(new jade.DebugItem( 0, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/AddToCartButton.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 1, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/AddToCartButton.jade" ));
+  buf.push("<span>");
+  jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
+  jade_debug.unshift(new jade.DebugItem( 2, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/AddToCartButton.jade" ));
+  buf.push("<span>" + (jade.escape(null == (jade_interp = hash) ? "" : jade_interp)));
+  jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
+  jade_debug.shift();
+  buf.push("</span>");
+  jade_debug.shift();
+  jade_debug.shift();
+  buf.push("</span>");
+  jade_debug.shift();
+  jade_debug.shift();}.call(this,"hash" in locals_for_with?locals_for_with.hash:typeof hash!=="undefined"?hash:undefined));;return buf.join("");
+  } catch (err) {
+    jade.rethrow(err, jade_debug[0].filename, jade_debug[0].lineno, "span\n  span=hash");
+  }
+  }
+
+/***/ },
+/* 12 */
+/***/ function(module, exports, __webpack_require__) {
+
+  'use strict';
+  
+  /**
+   * Merge two attribute objects giving precedence
+   * to values in object `b`. Classes are special-cased
+   * allowing for arrays and merging/joining appropriately
+   * resulting in a string.
+   *
+   * @param {Object} a
+   * @param {Object} b
+   * @return {Object} a
+   * @api private
+   */
+  
+  exports.merge = function merge(a, b) {
+    if (arguments.length === 1) {
+      var attrs = a[0];
+      for (var i = 1; i < a.length; i++) {
+        attrs = merge(attrs, a[i]);
+      }
+      return attrs;
+    }
+    var ac = a['class'];
+    var bc = b['class'];
+  
+    if (ac || bc) {
+      ac = ac || [];
+      bc = bc || [];
+      if (!Array.isArray(ac)) ac = [ac];
+      if (!Array.isArray(bc)) bc = [bc];
+      a['class'] = ac.concat(bc).filter(nulls);
+    }
+  
+    for (var key in b) {
+      if (key != 'class') {
+        a[key] = b[key];
+      }
+    }
+  
+    return a;
+  };
+  
+  /**
+   * Filter null `val`s.
+   *
+   * @param {*} val
+   * @return {Boolean}
+   * @api private
+   */
+  
+  function nulls(val) {
+    return val != null && val !== '';
+  }
+  
+  /**
+   * join array as classes.
+   *
+   * @param {*} val
+   * @return {String}
+   */
+  exports.joinClasses = joinClasses;
+  function joinClasses(val) {
+    return (Array.isArray(val) ? val.map(joinClasses) :
+      (val && typeof val === 'object') ? Object.keys(val).filter(function (key) { return val[key]; }) :
+      [val]).filter(nulls).join(' ');
+  }
+  
+  /**
+   * Render the given classes.
+   *
+   * @param {Array} classes
+   * @param {Array.<Boolean>} escaped
+   * @return {String}
+   */
+  exports.cls = function cls(classes, escaped) {
+    var buf = [];
+    for (var i = 0; i < classes.length; i++) {
+      if (escaped && escaped[i]) {
+        buf.push(exports.escape(joinClasses([classes[i]])));
+      } else {
+        buf.push(joinClasses(classes[i]));
+      }
+    }
+    var text = joinClasses(buf);
+    if (text.length) {
+      return ' class="' + text + '"';
+    } else {
+      return '';
+    }
+  };
+  
+  
+  exports.style = function (val) {
+    if (val && typeof val === 'object') {
+      return Object.keys(val).map(function (style) {
+        return style + ':' + val[style];
+      }).join(';');
+    } else {
+      return val;
+    }
+  };
+  /**
+   * Render the given attribute.
+   *
+   * @param {String} key
+   * @param {String} val
+   * @param {Boolean} escaped
+   * @param {Boolean} terse
+   * @return {String}
+   */
+  exports.attr = function attr(key, val, escaped, terse) {
+    if (key === 'style') {
+      val = exports.style(val);
+    }
+    if ('boolean' == typeof val || null == val) {
+      if (val) {
+        return ' ' + (terse ? key : key + '="' + key + '"');
+      } else {
+        return '';
+      }
+    } else if (0 == key.indexOf('data') && 'string' != typeof val) {
+      if (JSON.stringify(val).indexOf('&') !== -1) {
+        console.warn('Since Jade 2.0.0, ampersands (`&`) in data attributes ' +
+                     'will be escaped to `&amp;`');
+      };
+      if (val && typeof val.toISOString === 'function') {
+        console.warn('Jade will eliminate the double quotes around dates in ' +
+                     'ISO form after 2.0.0');
+      }
+      return ' ' + key + "='" + JSON.stringify(val).replace(/'/g, '&apos;') + "'";
+    } else if (escaped) {
+      if (val && typeof val.toISOString === 'function') {
+        console.warn('Jade will stringify dates in ISO form after 2.0.0');
+      }
+      return ' ' + key + '="' + exports.escape(val) + '"';
+    } else {
+      if (val && typeof val.toISOString === 'function') {
+        console.warn('Jade will stringify dates in ISO form after 2.0.0');
+      }
+      return ' ' + key + '="' + val + '"';
+    }
+  };
+  
+  /**
+   * Render the given attributes object.
+   *
+   * @param {Object} obj
+   * @param {Object} escaped
+   * @return {String}
+   */
+  exports.attrs = function attrs(obj, terse){
+    var buf = [];
+  
+    var keys = Object.keys(obj);
+  
+    if (keys.length) {
+      for (var i = 0; i < keys.length; ++i) {
+        var key = keys[i]
+          , val = obj[key];
+  
+        if ('class' == key) {
+          if (val = joinClasses(val)) {
+            buf.push(' ' + key + '="' + val + '"');
+          }
+        } else {
+          buf.push(exports.attr(key, val, false, terse));
+        }
+      }
+    }
+  
+    return buf.join('');
+  };
+  
+  /**
+   * Escape the given string of `html`.
+   *
+   * @param {String} html
+   * @return {String}
+   * @api private
+   */
+  
+  var jade_encode_html_rules = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;'
+  };
+  var jade_match_html = /[&<>"]/g;
+  
+  function jade_encode_char(c) {
+    return jade_encode_html_rules[c] || c;
+  }
+  
+  exports.escape = jade_escape;
+  function jade_escape(html){
+    var result = String(html).replace(jade_match_html, jade_encode_char);
+    if (result === '' + html) return html;
+    else return result;
+  };
+  
+  /**
+   * Re-throw the given `err` in context to the
+   * the jade in `filename` at the given `lineno`.
+   *
+   * @param {Error} err
+   * @param {String} filename
+   * @param {String} lineno
+   * @api private
+   */
+  
+  exports.rethrow = function rethrow(err, filename, lineno, str){
+    if (!(err instanceof Error)) throw err;
+    if ((typeof window != 'undefined' || !filename) && !str) {
+      err.message += ' on line ' + lineno;
+      throw err;
+    }
+    try {
+      str = str || __webpack_require__(13).readFileSync(filename, 'utf8')
+    } catch (ex) {
+      rethrow(err, null, lineno)
+    }
+    var context = 3
+      , lines = str.split('\n')
+      , start = Math.max(lineno - context, 0)
+      , end = Math.min(lines.length, lineno + context);
+  
+    // Error context
+    var context = lines.slice(start, end).map(function(line, i){
+      var curr = i + start + 1;
+      return (curr == lineno ? '  > ' : '    ')
+        + curr
+        + '| '
+        + line;
+    }).join('\n');
+  
+    // Alter exception message
+    err.path = filename;
+    err.message = (filename || 'Jade') + ':' + lineno
+      + '\n' + context + '\n\n' + err.message;
+    throw err;
+  };
+  
+  exports.DebugItem = function DebugItem(lineno, filename) {
+    this.lineno = lineno;
+    this.filename = filename;
+  }
+
+
+/***/ },
+/* 13 */
+/***/ function(module, exports) {
+
+  /* (ignored) */
 
 /***/ }
 /******/ ]);

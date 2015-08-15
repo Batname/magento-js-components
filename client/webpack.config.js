@@ -78,7 +78,7 @@ const config = {
       },
       {
         test: /\.scss$/,
-        loader: `${STYLE_LOADER}!${CSS_LOADER}!sass-loader?${sassPaths}`
+        loader: `${CSS_LOADER}!sass-loader?${sassPaths}`
       },
       {
         test: /\.gif/,
@@ -95,6 +95,10 @@ const config = {
       {
         test: /\.svg/,
         loader: 'url-loader?limit=10000&mimetype=image/svg+xml'
+      },
+      {
+        test: /\.jade$/,
+        loader: "jade-loader"
       },
       {
         test: /\.jsx?$/,

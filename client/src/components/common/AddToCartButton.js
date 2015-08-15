@@ -1,19 +1,23 @@
 import _ from 'lodash';
+import styles from './AddToCartButton.scss';
+import template from './AddToCartButton.jade';
+import CommonActions from '../../actions/CommonActions';
+import withStyles from '../../decorators/withStyles';
+const CommonStore = require('../../stores/CommonStore')();
 
-let text;
-
+@withStyles(styles)
 class AddToCartButton{
   constructor(options){
     _.assign(this, options);
-    this.elem.addEventListener('mouseover', this.mouseover.bind(this));
-    this.elem.addEventListener('mouseout', this.mouseout.bind(this));
-    text = this.elem.children[0].children[0].innerText;
+    this.elem.onclick = null;
+    this.elem.addEventListener('click', this.click.bind(this));
+    CommonStore.changeEvent(this);
   }
-  mouseover(){
-    this.elem.children[0].children[0].innerText = 'mouseover';
+  click(){
+    CommonActions.addToCart(this);
   }
-  mouseout(){
-    this.elem.children[0].children[0].innerText = text;
+  render(){
+    this.elem.innerHTML = template(this);
   }
 }
 
