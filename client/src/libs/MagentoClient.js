@@ -8,7 +8,7 @@ export default (options = {}) => {
 
   let createComponent = (constructor, options) => {
     let count = componentCounter++;
-    let hiddehOptions =  {count: count, hash: _.uniqueId(`component_${count}_`), componentName: constructor.name};
+    let hiddehOptions =  {count: count, hash: _.uniqueId(`component_${count}_`), componentName: constructor.name, componentData: {}};
     components.push(hiddehOptions);
     return new constructor(_.assign(options, hiddehOptions));
   };

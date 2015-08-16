@@ -1,3 +1,5 @@
+import 'babel/polyfill';
+
 import _ from 'lodash';
 import FastClick from 'fastclick';
 const MagentoClient = require('../libs/MagentoClient')();
@@ -6,7 +8,7 @@ import CartSidebar from '../components/common/CartSidebar';
 import CommonStore from '../stores/CommonStore';
 
 // Get elements
-const cartSidebarElem = document.getElementById('cart-sidebar');
+const cartSidebarElem = document.getElementById('cart-sidebar-component');
 const buttonsElems = document.querySelectorAll('[data-add-to-cart-button]');
 
 function run() {

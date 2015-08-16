@@ -1,0 +1,41 @@
+.block-title.odd
+  strong
+    span My Cart
+.block-content.last.even
+  .summary
+    p.amount
+      | There are
+      a(href='http://magento-js-components.dev/index.php/checkout/cart/')
+        span &nbsp;
+        span=qty
+        span &nbsp;
+        span items
+      |  in your cart.
+    p.subtotal
+      span.label Cart Subtotal:
+      span.price
+        span $
+        span=total
+  .actions
+    button.button(type='button', title='Checkout', onclick="setLocation('http://magento-js-components.dev/index.php/checkout/onepage/')")
+      span
+        span Checkout
+  p.block-subtitle Recently added item(s)
+  ol#cart-sidebar.mini-products-list
+    each item in response
+      li.item
+        a.product-image(href=item.url, title=item.name)
+          img(src=item.image, width='50', height='50', al=item.name)
+        .product-details
+          a.btn-remove(href='#', title='Remove This Item', onclick="return confirm('Are you sure you would like to remove this item from the shopping cart?');") Remove This Item
+          a.btn-edit(href='#', title='Edit item') Edit item
+          p.product-name
+            a(href=item.url)
+              span=item.name
+          strong
+            span=item.qty
+            span  x
+            span.price
+              span $
+              span &nbsp;
+              span=item.price

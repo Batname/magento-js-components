@@ -1,0 +1,19 @@
+<?xml version="1.0" ?>
+<config>
+    <modules>
+        <Client_Cart>
+            <version>0.0.1</version>
+        </Client_Cart>
+    </modules>
+    <frontend>
+        <routers>
+            <client_cart>
+                <use>standard</use>
+                <args>
+                    <module>Client_Cart</module>
+                    <frontName>client</frontName>
+                </args>
+            </client_cart>
+        </routers>
+    </frontend>
+</config>

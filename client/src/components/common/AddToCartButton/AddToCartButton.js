@@ -5,10 +5,18 @@ import CommonActions from '../../../actions/CommonActions';
 import withStyles from '../../../decorators/withStyles';
 import CommonStore from '../../../stores/CommonStore';
 
+
+function getProductPostOptions (component) {
+  let re = /product\/\d+\/form_key/i;
+  let url = component.elem.onclick.toString();
+  return {id: url.match(re)[0].match(/\d+/g)[0], qty:1};
+}
+
 @withStyles(styles)
 class AddToCartButton{
   constructor(options){
     _.assign(this, options);
+    this.postOptions = getProductPostOptions(this);
     this.elem.onclick = null;
     this.elem.addEventListener('click', this.click.bind(this));
     CommonStore.changeEvent(this);
@@ -17,7 +25,8 @@ class AddToCartButton{
     CommonActions.addToCart(this);
   }
   render(){
-    this.elem.innerHTML = template(this);
+    let qty = _.result(_.chain(this.componentData.response).where({productId: this.postOptions.id}).first().value(), 'qty');
+    this.elem.innerHTML = template({qty: qty});
   }
 }
 

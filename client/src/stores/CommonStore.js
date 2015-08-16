@@ -18,8 +18,12 @@ const CommonStore = {
   },
   registerEvents(){
     if(!register){
-      document.addEventListener(CommonConstants.ADD_TO_CART, () => {
-        events.each((event) => event.detail.render());
+      document.addEventListener(CommonConstants.ADD_TO_CART, (event) => {
+        let cartData = event.detail;
+        events.each((event) => {
+          event.detail.componentData = cartData;
+          event.detail.render();
+        });
       }, false);
 
       register = true;

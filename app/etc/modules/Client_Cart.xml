@@ -1,0 +1,9 @@
+<?xml version="1.0" ?>
+<config>
+    <modules>
+        <Client_Cart>
+            <active>true</active>
+            <codePool>local</codePool>
+        </Client_Cart>
+    </modules>
+</config>
