@@ -13930,38 +13930,42 @@
   
   function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
   
+  var _lodash = __webpack_require__(44);
+  
+  var _lodash2 = _interopRequireDefault(_lodash);
+  
   var _constantsCommonConstants = __webpack_require__(170);
   
   var _constantsCommonConstants2 = _interopRequireDefault(_constantsCommonConstants);
   
-  var CHANGE = 'CHANGE';
-  var events = [];
-  var register = false;
+  var subscribers = {};
+  var cartData = {};
   
   var CommonStore = {
   
-    changeEvent: function changeEvent(component) {
-  
-      var eventName = CHANGE + '_' + component.componentName;
-  
-      var newEvent = new CustomEvent(eventName, {
-        detail: component
-      });
-  
-      events.push(newEvent);
+    getCartData: function getCartData() {
+      return cartData;
     },
-    registerEvents: function registerEvents() {
-      if (!register) {
-        document.addEventListener(_constantsCommonConstants2['default'].ADD_TO_CART, function (event) {
-          var cartData = event.detail;
-          events.each(function (event) {
-            event.detail.componentData = cartData;
-            event.detail.render();
-          });
-        }, false);
   
-        register = true;
-      }
+    cartChangeSubscription: function cartChangeSubscription(component) {
+      if (_lodash2['default'].isUndefined(subscribers.cart)) subscribers.cart = [];
+      subscribers.cart.push(component);
+    },
+  
+    emitChange: function emitChange(subscribe_type, data) {
+      subscribers[subscribe_type].each(function (component) {
+        component.setComponentData(subscribe_type, data);
+        component.render();
+      });
+    },
+  
+    registerEvents: function registerEvents() {
+      var _this = this;
+  
+      document.addEventListener(_constantsCommonConstants2['default'].ADD_TO_CART, function (event) {
+        cartData = event.detail;
+        _this.emitChange('cart', cartData);
+      });
     }
   };
   
@@ -17206,20 +17210,20 @@
       _classCallCheck(this, CartSidebar);
   
       _lodash2['default'].assign(this, options);
-      _storesCommonStore2['default'].changeEvent(this);
+      _storesCommonStore2['default'].cartChangeSubscription(this);
     }
   
     _createClass(CartSidebar, [{
       key: 'render',
       value: function render() {
         var totals = {
-          qty: _lodash2['default'].chain(this.componentData.response).pluck('qty').sum().value(),
-          total: _lodash2['default'].chain(this.componentData.response).map(function (item) {
+          qty: _lodash2['default'].chain(this.componentData.cart.response).pluck('qty').sum().value(),
+          total: _lodash2['default'].chain(this.componentData.cart.response).map(function (item) {
             return item.qty * item.price;
           }).sum().round(2).value(),
-          response: _lodash2['default'].chain(this.componentData.response).sortByOrder(['updated'], ['desc']).value()
+          response: _lodash2['default'].chain(this.componentData.cart.response).sortByOrder(['updated'], ['desc']).value()
         };
-        this.elem.innerHTML = (0, _CartSidebarJade2['default'])(_lodash2['default'].assign(this.componentData, totals));
+        this.elem.innerHTML = (0, _CartSidebarJade2['default'])(_lodash2['default'].assign(this.componentData.cart, totals));
       }
     }]);
   
@@ -17268,6 +17272,9 @@
     var createComponent = function createComponent(constructor, options) {
       var count = componentCounter++;
       var hiddehOptions = { count: count, hash: _lodash2['default'].uniqueId('component_' + count + '_'), componentName: constructor.name, componentData: {} };
+      constructor.prototype.setComponentData = function (key, data) {
+        this.componentData[key] = data;
+      };
       components.push(hiddehOptions);
       return new constructor(_lodash2['default'].assign(options, hiddehOptions));
     };
@@ -18981,7 +18988,7 @@
       this.postOptions = getProductPostOptions(this);
       this.elem.onclick = null;
       this.elem.addEventListener('click', this.click.bind(this));
-      _storesCommonStore2['default'].changeEvent(this);
+      _storesCommonStore2['default'].cartChangeSubscription(this);
     }
   
     _createClass(AddToCartButton, [{
@@ -18992,7 +18999,7 @@
     }, {
       key: 'render',
       value: function render() {
-        var qty = _lodash2['default'].result(_lodash2['default'].chain(this.componentData.response).where({ productId: this.postOptions.id }).first().value(), 'qty');
+        var qty = _lodash2['default'].result(_lodash2['default'].chain(this.componentData.cart.response).where({ productId: this.postOptions.id }).first().value(), 'qty');
         this.elem.innerHTML = (0, _AddToCartButtonJade2['default'])({ qty: qty });
       }
     }]);

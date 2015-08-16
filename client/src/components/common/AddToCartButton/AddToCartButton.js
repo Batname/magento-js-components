@@ -19,13 +19,13 @@ class AddToCartButton{
     this.postOptions = getProductPostOptions(this);
     this.elem.onclick = null;
     this.elem.addEventListener('click', this.click.bind(this));
-    CommonStore.changeEvent(this);
+    CommonStore.cartChangeSubscription(this);
   }
   click(){
     CommonActions.addToCart(this);
   }
   render(){
-    let qty = _.result(_.chain(this.componentData.response).where({productId: this.postOptions.id}).first().value(), 'qty');
+    let qty = _.result(_.chain(this.componentData.cart.response).where({productId: this.postOptions.id}).first().value(), 'qty');
     this.elem.innerHTML = template({qty: qty});
   }
 }

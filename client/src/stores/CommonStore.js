@@ -1,33 +1,32 @@
+import _ from 'lodash';
 import CommonConstants from '../constants/CommonConstants';
 
-const CHANGE = 'CHANGE';
-let events = [];
-let register = false;
+let subscribers = {};
+let cartData = {};
 
 const CommonStore = {
 
-  changeEvent(component){
-
-    let eventName = `${CHANGE}_${component.componentName}`;
-
-    let newEvent = new CustomEvent(eventName, {
-      detail: component
-    });
-
-    events.push(newEvent);
+  getCartData(){
+    return cartData;
   },
-  registerEvents(){
-    if(!register){
-      document.addEventListener(CommonConstants.ADD_TO_CART, (event) => {
-        let cartData = event.detail;
-        events.each((event) => {
-          event.detail.componentData = cartData;
-          event.detail.render();
-        });
-      }, false);
 
-      register = true;
-    }
+  cartChangeSubscription(component){
+    if(_.isUndefined(subscribers.cart)) subscribers.cart = [];
+    subscribers.cart.push(component);
+  },
+
+  emitChange(subscribe_type, data){
+    subscribers[subscribe_type].each((component) => {
+      component.setComponentData(subscribe_type, data);
+      component.render();
+    });
+  },
+
+  registerEvents(){
+    document.addEventListener(CommonConstants.ADD_TO_CART, (event) => {
+      cartData = event.detail;
+      this.emitChange('cart', cartData);
+    });
   }
 };
 
