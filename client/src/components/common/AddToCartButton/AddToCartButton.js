@@ -1,9 +1,9 @@
 import _ from 'lodash';
 import styles from './AddToCartButton.scss';
 import template from './AddToCartButton.jade';
-import CommonActions from '../../actions/CommonActions';
-import withStyles from '../../decorators/withStyles';
-const CommonStore = require('../../stores/CommonStore')();
+import CommonActions from '../../../actions/CommonActions';
+import withStyles from '../../../decorators/withStyles';
+import CommonStore from '../../../stores/CommonStore';
 
 @withStyles(styles)
 class AddToCartButton{

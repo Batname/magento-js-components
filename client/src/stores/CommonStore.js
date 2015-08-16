@@ -2,6 +2,7 @@ import CommonConstants from '../constants/CommonConstants';
 
 const CHANGE = 'CHANGE';
 let events = [];
+let register = false;
 
 const CommonStore = {
 
@@ -13,18 +14,17 @@ const CommonStore = {
       detail: component
     });
 
-    component.elem.addEventListener(eventName, (event) => {
-      alert( event.detail );
-    }, false);
-
     events.push(newEvent);
+  },
+  registerEvents(){
+    if(!register){
+      document.addEventListener(CommonConstants.ADD_TO_CART, () => {
+        events.each((event) => event.detail.render());
+      }, false);
+
+      register = true;
+    }
   }
 };
 
-export default () => {
-  document.addEventListener(CommonConstants.ADD_TO_CART, () => {
-    events.each((event) => event.detail.render());
-  }, false);
-
-  return CommonStore;
-};
+export default CommonStore;
