@@ -6,26 +6,26 @@ import withStyles from '../../../decorators/withStyles';
 import CommonStore from '../../../stores/CommonStore';
 
 
-function getProductPostOptions (component) {
-  let re = /product\/\d+\/form_key/i;
-  let url = component.elem.onclick.toString();
-  return {id: url.match(re)[0].match(/\d+/g)[0], qty:1};
-}
-
 @withStyles(styles)
 class AddToCartButton{
   constructor(options){
     _.assign(this, options);
-    this.postOptions = getProductPostOptions(this);
     this.elem.onclick = null;
     this.elem.addEventListener('click', this.click.bind(this));
     CommonStore.cartChangeSubscription(this);
+    CommonStore.qtyChangeSubscription(this);
+    this.getInitComponentData();
   }
   click(){
-    CommonActions.addToCart(this);
+    let postData = _.assign(this.elem.dataset, {qty: this.componentData.qty || this.elem.dataset.qty});
+    CommonActions.addToCart(postData);
+  }
+  getInitComponentData(){
+    this.setComponentData('qty', CommonStore.getQty());
+    this.setComponentData('cart', CommonStore.getCartData());
   }
   render(){
-    let qty = _.result(_.chain(this.componentData.cart.response).where({productId: this.postOptions.id}).first().value(), 'qty');
+    let qty = _.result(_.chain(this.componentData.cart.response).where({productId: this.elem.dataset.id}).first().value(), 'qty');
     this.elem.innerHTML = template({qty: qty});
   }
 }

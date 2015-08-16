@@ -50,10 +50,6 @@
   
   __webpack_require__(178);
   
-  var _lodash = __webpack_require__(26);
-  
-  var _lodash2 = _interopRequireDefault(_lodash);
-  
   var _componentsCommonAddToCartButton = __webpack_require__(173);
   
   var _componentsCommonAddToCartButton2 = _interopRequireDefault(_componentsCommonAddToCartButton);
@@ -61,6 +57,10 @@
   var _componentsCommonCartSidebar = __webpack_require__(174);
   
   var _componentsCommonCartSidebar2 = _interopRequireDefault(_componentsCommonCartSidebar);
+  
+  var _componentsCommonInputQty = __webpack_require__(190);
+  
+  var _componentsCommonInputQty2 = _interopRequireDefault(_componentsCommonInputQty);
   
   var _storesCommonStore = __webpack_require__(45);
   
@@ -70,7 +70,8 @@
   
   // Get elements
   var cartSidebarElem = document.getElementById('cart-sidebar-component');
-  var buttonsElems = document.querySelectorAll('[data-add-to-cart-button]');
+  var addToCartButtonElem = document.getElementById('product-addtocart-button');
+  var inputQtyElem = document.getElementById('qty');
   
   function run() {
   
@@ -79,9 +80,8 @@
   
     // Create components
     MagentoClient.createComponent(_componentsCommonCartSidebar2['default'], { elem: cartSidebarElem });
-    _lodash2['default'].forEach(buttonsElems, function (e) {
-      return MagentoClient.createComponent(_componentsCommonAddToCartButton2['default'], { elem: e });
-    });
+    MagentoClient.createComponent(_componentsCommonAddToCartButton2['default'], { elem: addToCartButtonElem });
+    MagentoClient.createComponent(_componentsCommonInputQty2['default'], { elem: inputQtyElem });
   }
   
   // Run App
@@ -20644,6 +20644,67 @@
 
   /* (ignored) */
 
+/***/ },
+/* 190 */
+/***/ function(module, exports, __webpack_require__) {
+
+  'use strict';
+  
+  Object.defineProperty(exports, '__esModule', {
+    value: true
+  });
+  
+  var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+  
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+  
+  function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+  
+  var _lodash = __webpack_require__(26);
+  
+  var _lodash2 = _interopRequireDefault(_lodash);
+  
+  var _actionsCommonActions = __webpack_require__(171);
+  
+  var _actionsCommonActions2 = _interopRequireDefault(_actionsCommonActions);
+  
+  var _storesCommonStore = __webpack_require__(45);
+  
+  var _storesCommonStore2 = _interopRequireDefault(_storesCommonStore);
+  
+  var InputQty = (function () {
+    function InputQty(options) {
+      _classCallCheck(this, InputQty);
+  
+      _lodash2['default'].assign(this, options);
+      this.elem.addEventListener('change', this.change.bind(this));
+      _storesCommonStore2['default'].cartChangeSubscription(this);
+      this.getInitComponentData();
+    }
+  
+    _createClass(InputQty, [{
+      key: 'change',
+      value: function change() {
+        _actionsCommonActions2['default'].setInputValue(this);
+      }
+    }, {
+      key: 'getInitComponentData',
+      value: function getInitComponentData() {
+        this.setComponentData('qty', _storesCommonStore2['default'].getQty());
+      }
+    }, {
+      key: 'render',
+      value: function render() {
+        this.elem.value = this.componentData.qty;
+      }
+    }]);
+  
+    return InputQty;
+  })();
+  
+  exports['default'] = InputQty;
+  module.exports = exports['default'];
+
 /***/ }
 /******/ ]);
-//# sourceMappingURL=catalog-category-view.js.map
+//# sourceMappingURL=catalog-product-view.js.map

@@ -3,6 +3,7 @@ import CommonConstants from '../constants/CommonConstants';
 
 let subscribers = {};
 let cartData = {};
+let qty = 1;
 
 const CommonStore = {
 
@@ -10,23 +11,40 @@ const CommonStore = {
     return cartData;
   },
 
+  getQty(){
+    return qty;
+  },
+
   cartChangeSubscription(component){
     if(_.isUndefined(subscribers.cart)) subscribers.cart = [];
     subscribers.cart.push(component);
   },
 
-  emitChange(subscribe_type, data){
+  qtyChangeSubscription(component){
+    if(_.isUndefined(subscribers.qty)) subscribers.qty = [];
+    subscribers.qty.push(component);
+  },
+
+  emitChanges(subscribe_type, data, render=false){
     subscribers[subscribe_type].each((component) => {
       component.setComponentData(subscribe_type, data);
-      component.render();
+      if(render) component.render();
     });
   },
 
   registerEvents(){
     document.addEventListener(CommonConstants.ADD_TO_CART, (event) => {
       cartData = event.detail;
-      this.emitChange('cart', cartData);
+      qty = 1;
+      this.emitChanges('cart', cartData, true);
+      this.emitChanges('qty', qty);
     });
+
+    document.addEventListener(CommonConstants.CHANGE_PRODUCT_QTY, (event) => {
+      qty = event.detail.elem.value;
+      this.emitChanges('qty', qty);
+    });
+
   }
 };
 

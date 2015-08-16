@@ -118,7 +118,8 @@ const config = {
 const clientConfig = merge({}, config, {
   entry: {
     'cms-index-index': `${entrances}cms-index-index.js`,
-    'catalog-category-view': `${entrances}catalog-category-view.js`
+    'catalog-category-view': `${entrances}catalog-category-view.js`,
+    'catalog-product-view': `${entrances}catalog-product-view.js`
   },
   output: {
     path: output,

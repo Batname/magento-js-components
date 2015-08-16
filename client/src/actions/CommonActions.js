@@ -1,10 +1,10 @@
 import CommonConstants from '../constants/CommonConstants';
 import CartApi from '../api/CartApi';
 
-async function addToCart(component){
+async function addToCart(options){
   try{
 
-    let cartData = await CartApi.addToCartUrl(component.postOptions);
+    let cartData = await CartApi.addToCartUrl(options);
     let event = new CustomEvent(CommonConstants.ADD_TO_CART, {
       detail: cartData
     });
@@ -14,7 +14,15 @@ async function addToCart(component){
   }
 }
 
+function setInputValue(component){
+  let event = new CustomEvent(CommonConstants.CHANGE_PRODUCT_QTY, {
+    detail: component
+  });
+  document.dispatchEvent(event);
+}
+
 
 export default {
-  addToCart: addToCart
+  addToCart: addToCart,
+  setInputValue: setInputValue
 };

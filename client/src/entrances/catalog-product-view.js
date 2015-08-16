@@ -1,14 +1,15 @@
 import 'babel/polyfill';
 
-import _ from 'lodash';
 import AddToCartButton from '../components/common/AddToCartButton';
 import CartSidebar from '../components/common/CartSidebar';
+import InputQty from '../components/common/InputQty';
 import CommonStore from '../stores/CommonStore';
 const MagentoClient = require('../libs/MagentoClient')();
 
 // Get elements
 const cartSidebarElem = document.getElementById('cart-sidebar-component');
-const buttonsElems = document.querySelectorAll('[data-add-to-cart-button]');
+const addToCartButtonElem = document.getElementById('product-addtocart-button');
+const inputQtyElem = document.getElementById('qty');
 
 function run() {
 
@@ -17,7 +18,8 @@ function run() {
 
   // Create components
   MagentoClient.createComponent(CartSidebar, {elem: cartSidebarElem});
-  _.forEach(buttonsElems, e => MagentoClient.createComponent(AddToCartButton, {elem: e}));
+  MagentoClient.createComponent(AddToCartButton, {elem: addToCartButtonElem});
+  MagentoClient.createComponent(InputQty, {elem: inputQtyElem});
 }
 
 // Run App
