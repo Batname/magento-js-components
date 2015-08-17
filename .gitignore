@@ -1,6 +1,7 @@
-var
-media
-dowloader
-client/build
-client/node_modules
-client/npm-debug.log
+/var
+/media
+/dowloader
+/client/build
+/client/node_modules
+/client/npm-debug.log
+/app/etc/local.xml
