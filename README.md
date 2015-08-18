@@ -1,10 +1,5 @@
 # Magento ES6 Web components architecture
 
-[![Build Status](http://img.shields.io/travis/kriasoft/react-starter-kit/master.svg?style=flat-square)](http://travis-ci.org/kriasoft/react-starter-kit)
-[![Dependency Status](https://david-dm.org/kriasoft/react-starter-kit.svg?style=flat-square)](https://david-dm.org/kriasoft/react-starter-kit)
-[![Tips](http://img.shields.io/gratipay/koistya.svg?style=flat-square)](https://gratipay.com/koistya)
-[![Gitter](http://img.shields.io/badge/chat_room-%23react--starter--kit-blue.svg?style=flat-square)](https://gitter.im/kriasoft/react-starter-kit)
-
 > This project template is a skeleton for
 > magento application ES6 native web components architecture.
 
@@ -15,7 +10,6 @@
 ### Directory Layout
 
 ```
-.
 Main folder /client/ output folder /skin/
 
 ├── /node_modules/              # 3rd-party libraries and utilities
