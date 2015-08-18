@@ -40,7 +40,6 @@ const CommonStore = {
       component.setComponentData(subscribe_type, data);
       if(render) component.render();
     });
-    subscribers[subscribe_type] = [];
   },
 
   registerEvents(){
