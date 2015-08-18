@@ -1,5 +1,7 @@
 import gulp from 'gulp';
 import runSequence from 'run-sequence';
+import gulpLoad from 'gulp-load-plugins';
+let plagins = gulpLoad();
 
 process.env.UV_THREADPOOL_SIZE = 100;
 
@@ -17,6 +19,9 @@ function lazyRequireTask(path) {
 // Webpack build
 const webpackConfig = {path: '../webpack.config.js', watch: true};
 gulp.task('webpack', lazyRequireTask('./tasks/webpack', webpackConfig));
+
+// Nginx config
+gulp.task('config:nginx', lazyRequireTask('./tasks/configNginx', {plagins:plagins}));
 
 
 // Build and start watching for modifications

@@ -1,0 +1,52 @@
+server {
+  listen   80;
+  root <%- root %>;
+  index index.html index.php;
+
+  location / {
+    index index.html index.php;
+    try_files $uri $uri/ @handler;
+    expires max; ## Enable max file cache
+  }
+
+  location ^~ /app/                { deny all; }
+  location ^~ /includes/           { deny all; }
+  location ^~ /lib/                { deny all; }
+  location ^~ /media/downloadable/ { deny all; }
+  location ^~ /pkginfo/            { deny all; }
+  location ^~ /report/config.xml   { deny all; }
+  location ^~ /var/                { deny all; }
+
+  location /var/export/ {
+    auth_basic           "Restricted";
+    auth_basic_user_file htpasswd; ## Defined at /etc/nginx/htpassword
+    autoindex            on;
+  }
+
+  location  /. {
+    return 404;
+  }
+
+  location @handler {
+    rewrite / /index.php;
+  }
+
+  location ~ .php/ {
+    rewrite ^(.*.php)/ $1 last;
+  }
+
+  location ~ \.php$ {
+
+  if (!-e $request_filename) { rewrite / /index.php last; }
+    try_files $uri =404;
+    fastcgi_pass unix:/var/run/php5-fpm.sock;
+    fastcgi_param  SCRIPT_FILENAME  $document_root$fastcgi_script_name;
+    include        fastcgi_params;
+    fastcgi_param  MAGE_RUN_CODE default;
+    fastcgi_param  MAGE_RUN_TYPE store;
+    fastcgi_buffer_size 128k;
+    fastcgi_buffers 256 4k;
+    fastcgi_busy_buffers_size 256k;
+    fastcgi_temp_file_write_size 256k;
+  }
+}
