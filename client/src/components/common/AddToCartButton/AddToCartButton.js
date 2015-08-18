@@ -3,15 +3,15 @@ import styles from './AddToCartButton.scss';
 import template from './AddToCartButton.jade';
 import CommonActions from '../../../actions/CommonActions';
 import withStyles from '../../../decorators/withStyles';
+import withEvents from '../../../decorators/withEvents';
 import CommonStore from '../../../stores/CommonStore';
 
 
 @withStyles(styles)
+@withEvents(true)
 class AddToCartButton{
   constructor(options){
     _.assign(this, options);
-    this.elem.onclick = null;
-    this.elem.addEventListener('click', this.click.bind(this));
     CommonStore.cartChangeSubscription(this);
     CommonStore.qtyChangeSubscription(this);
     this.getInitComponentData();
