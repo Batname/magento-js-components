@@ -8,6 +8,15 @@ export default (options = {}) => {
   let _componentPrototype = {
     setComponentData: function(key, data) {
       this.componentData[key] = data;
+    },
+    setCSSClass: function(class_name){
+      if(!this.elem.contains(class_name)) this.elem.classList.add(class_name);
+    },
+    unsetCSSClass: function(class_name){
+      if(!this.elem.contains(class_name)) this.elem.classList.remove(class_name);
+    },
+    toggleCSSClass: function(class_name){
+      this.elem.classList.toggle(class_name);
     }
   };
 

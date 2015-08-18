@@ -25,11 +25,22 @@ const CommonStore = {
     subscribers.qty.push(component);
   },
 
+  loaderSubscription(component){
+    if(_.isUndefined(subscribers.loader)) subscribers.loader = [];
+    subscribers.loader.push(component);
+  },
+
+  loadedSubscription(component){
+    if(_.isUndefined(subscribers.loaded)) subscribers.loaded = [];
+    subscribers.loaded.push(component);
+  },
+
   emitChanges(subscribe_type, data, render=false){
     subscribers[subscribe_type].each((component) => {
       component.setComponentData(subscribe_type, data);
       if(render) component.render();
     });
+    subscribers[subscribe_type] = [];
   },
 
   registerEvents(){
@@ -43,6 +54,18 @@ const CommonStore = {
     document.addEventListener(CommonConstants.CHANGE_PRODUCT_QTY, (event) => {
       qty = event.detail.elem.value;
       this.emitChanges('qty', qty);
+    });
+
+    document.addEventListener(CommonConstants.LOADER, () => {
+      subscribers.loader.each((component) => {
+        component.toggleCSSClass('display-none');
+      });
+    });
+
+    document.addEventListener(CommonConstants.LOADED, () => {
+      subscribers.loaded.each((component) => {
+        component.toggleCSSClass('display-none');
+      });
     });
 
   }

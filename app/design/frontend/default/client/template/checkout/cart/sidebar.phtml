@@ -32,6 +32,7 @@
 
 ?>
 <?php if ($this->getIsNeedToDisplaySideBar()):?>
+<div id="spinner-component" class="spinner display-none"></div>
 <div id="cart-sidebar-component" class="block block-cart">
     <?php $_cartQty = $this->getSummaryCount() ?>
     <div class="block-title">

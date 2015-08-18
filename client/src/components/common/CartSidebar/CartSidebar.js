@@ -1,11 +1,16 @@
 import _ from 'lodash';
 import CommonStore from '../../../stores/CommonStore';
+import withStyles from '../../../decorators/withStyles';
+import styles from './CartSidebar.scss';
 import template from './CartSidebar.jade';
 
+@withStyles(styles)
 class CartSidebar{
   constructor(options){
     _.assign(this, options);
     CommonStore.cartChangeSubscription(this);
+    CommonStore.loaderSubscription(this);
+    CommonStore.loadedSubscription(this);
   }
   render(){
     let totals = {

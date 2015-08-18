@@ -3,12 +3,13 @@ import CartApi from '../api/CartApi';
 
 async function addToCart(options){
   try{
-
+    document.dispatchEvent(new CustomEvent(CommonConstants.LOADER));
     let cartData = await CartApi.addToCartUrl(options);
     let event = new CustomEvent(CommonConstants.ADD_TO_CART, {
       detail: cartData
     });
     document.dispatchEvent(event);
+    document.dispatchEvent(new CustomEvent(CommonConstants.LOADED));
   } catch (err) {
     console.log(err);
   }
