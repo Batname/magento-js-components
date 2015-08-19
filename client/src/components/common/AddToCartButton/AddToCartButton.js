@@ -13,16 +13,23 @@ class AddToCartButton{
   constructor(options){
     _.assign(this, options);
     this.getInitComponentData();
+    this.componentWillMount();
   }
   click(){
-    CommonStore.cartChangeSubscription(this);
-    CommonStore.qtyChangeSubscription(this);
     let postData = _.assign(this.elem.dataset, {qty: this.componentData.qty || this.elem.dataset.qty});
     CommonActions.addToCart(postData);
   }
   getInitComponentData(){
     this.setComponentData('qty', CommonStore.getQty());
     this.setComponentData('cart', CommonStore.getCartData());
+  }
+  componentWillMount() {
+    CommonStore.onChange(this.onChange, this);
+  }
+  onChange(){
+    this.setComponentData('qty', CommonStore.getQty());
+    this.setComponentData('cart', CommonStore.getCartData());
+    this.render();
   }
   render(){
     let qty = _.result(_.chain(this.componentData.cart.response).where({productId: this.elem.dataset.id}).first().value(), 'qty');

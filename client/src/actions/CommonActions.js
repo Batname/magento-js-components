@@ -9,7 +9,6 @@ async function addToCart(options){
       detail: cartData
     });
     document.dispatchEvent(event);
-    document.dispatchEvent(new CustomEvent(CommonConstants.LOADED));
   } catch (err) {
     console.log(err);
   }

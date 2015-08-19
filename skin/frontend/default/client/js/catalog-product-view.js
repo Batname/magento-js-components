@@ -12815,17 +12815,15 @@
   
   function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
   
-  var _lodash = __webpack_require__(21);
-  
-  var _lodash2 = _interopRequireDefault(_lodash);
-  
   var _constantsCommonConstants = __webpack_require__(71);
   
   var _constantsCommonConstants2 = _interopRequireDefault(_constantsCommonConstants);
   
-  var subscribers = {};
   var cartData = {};
   var qty = 1;
+  var chengeEvent = undefined;
+  var chengeCallbacks = [];
+  var CHANGE_EVENT = 'change';
   
   var CommonStore = {
   
@@ -12837,60 +12835,40 @@
       return qty;
     },
   
-    cartChangeSubscription: function cartChangeSubscription(component) {
-      if (_lodash2['default'].isUndefined(subscribers.cart)) subscribers.cart = [];
-      subscribers.cart.push(component);
+    emitChange: function emitChange() {
+      document.dispatchEvent(chengeEvent);
     },
   
-    qtyChangeSubscription: function qtyChangeSubscription(component) {
-      if (_lodash2['default'].isUndefined(subscribers.qty)) subscribers.qty = [];
-      subscribers.qty.push(component);
-    },
-  
-    loaderSubscription: function loaderSubscription(component) {
-      if (_lodash2['default'].isUndefined(subscribers.loader)) subscribers.loader = [];
-      subscribers.loader.push(component);
-    },
-  
-    loadedSubscription: function loadedSubscription(component) {
-      if (_lodash2['default'].isUndefined(subscribers.loaded)) subscribers.loaded = [];
-      subscribers.loaded.push(component);
-    },
-  
-    emitChanges: function emitChanges(subscribe_type, data) {
-      var render = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
-  
-      subscribers[subscribe_type].each(function (component) {
-        component.setComponentData(subscribe_type, data);
-        if (render) component.render();
+    onChange: function onChange(callback, context) {
+      chengeCallbacks.push({ callback: callback, context: context });
+      chengeEvent = new CustomEvent(CHANGE_EVENT, {
+        detail: callback
       });
     },
   
     registerEvents: function registerEvents() {
       var _this = this;
   
+      document.addEventListener(CHANGE_EVENT, function () {
+        chengeCallbacks.each(function (cb) {
+          var e = cb.callback.bind(cb.context);
+          e();
+        });
+      });
+  
       document.addEventListener(_constantsCommonConstants2['default'].ADD_TO_CART, function (event) {
         cartData = event.detail;
         qty = 1;
-        _this.emitChanges('cart', cartData, true);
-        _this.emitChanges('qty', qty);
+        _this.emitChange();
       });
   
       document.addEventListener(_constantsCommonConstants2['default'].CHANGE_PRODUCT_QTY, function (event) {
         qty = event.detail.elem.value;
-        _this.emitChanges('qty', qty);
+        _this.emitChange();
       });
   
       document.addEventListener(_constantsCommonConstants2['default'].LOADER, function () {
-        subscribers.loader.each(function (component) {
-          component.toggleCSSClass('display-none');
-        });
-      });
-  
-      document.addEventListener(_constantsCommonConstants2['default'].LOADED, function () {
-        subscribers.loaded.each(function (component) {
-          component.toggleCSSClass('display-none');
-        });
+        _this.emitChange();
       });
     }
   };
@@ -14394,21 +14372,20 @@
           });
   
           document.dispatchEvent(_event);
-          document.dispatchEvent(new CustomEvent(_constantsCommonConstants2['default'].LOADED));
-          context$1$0.next = 13;
+          context$1$0.next = 12;
           break;
   
-        case 10:
-          context$1$0.prev = 10;
+        case 9:
+          context$1$0.prev = 9;
           context$1$0.t0 = context$1$0['catch'](0);
   
           console.log(context$1$0.t0);
   
-        case 13:
+        case 12:
         case 'end':
           return context$1$0.stop();
       }
-    }, null, this, [[0, 10]]);
+    }, null, this, [[0, 9]]);
   }
   
   function setInputValue(component) {
@@ -17716,13 +17693,12 @@
   
       _lodash2['default'].assign(this, options);
       this.getInitComponentData();
+      this.componentWillMount();
     }
   
     _createClass(AddToCartButton, [{
       key: 'click',
       value: function click() {
-        _storesCommonStore2['default'].cartChangeSubscription(this);
-        _storesCommonStore2['default'].qtyChangeSubscription(this);
         var postData = _lodash2['default'].assign(this.elem.dataset, { qty: this.componentData.qty || this.elem.dataset.qty });
         _actionsCommonActions2['default'].addToCart(postData);
       }
@@ -17731,6 +17707,18 @@
       value: function getInitComponentData() {
         this.setComponentData('qty', _storesCommonStore2['default'].getQty());
         this.setComponentData('cart', _storesCommonStore2['default'].getCartData());
+      }
+    }, {
+      key: 'componentWillMount',
+      value: function componentWillMount() {
+        _storesCommonStore2['default'].onChange(this.onChange, this);
+      }
+    }, {
+      key: 'onChange',
+      value: function onChange() {
+        this.setComponentData('qty', _storesCommonStore2['default'].getQty());
+        this.setComponentData('cart', _storesCommonStore2['default'].getCartData());
+        this.render();
       }
     }, {
       key: 'render',
@@ -17791,14 +17779,25 @@
       _classCallCheck(this, _CartSidebar);
   
       _lodash2['default'].assign(this, options);
-      _storesCommonStore2['default'].cartChangeSubscription(this);
-      _storesCommonStore2['default'].loaderSubscription(this);
-      _storesCommonStore2['default'].loadedSubscription(this);
+      this.componentWillMount();
     }
   
     _createClass(CartSidebar, [{
+      key: 'componentWillMount',
+      value: function componentWillMount() {
+        _storesCommonStore2['default'].onChange(this.onChange, this);
+      }
+    }, {
+      key: 'onChange',
+      value: function onChange() {
+        this.setComponentData('qty', _storesCommonStore2['default'].getQty());
+        this.setComponentData('cart', _storesCommonStore2['default'].getCartData());
+        this.render();
+      }
+    }, {
       key: 'render',
       value: function render() {
+        this.toggleCSSClass('display-none');
         var totals = {
           qty: _lodash2['default'].chain(this.componentData.cart.response).pluck('qty').sum().value(),
           total: _lodash2['default'].chain(this.componentData.cart.response).map(function (item) {
@@ -17828,6 +17827,8 @@
     value: true
   });
   
+  var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+  
   function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
   
   function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
@@ -17840,13 +17841,33 @@
   
   var _storesCommonStore2 = _interopRequireDefault(_storesCommonStore);
   
-  var Spinner = function Spinner(options) {
-    _classCallCheck(this, Spinner);
+  var Spinner = (function () {
+    function Spinner(options) {
+      _classCallCheck(this, Spinner);
   
-    _lodash2['default'].assign(this, options);
-    _storesCommonStore2['default'].loaderSubscription(this);
-    _storesCommonStore2['default'].loadedSubscription(this);
-  };
+      _lodash2['default'].assign(this, options);
+      this.componentWillMount();
+    }
+  
+    _createClass(Spinner, [{
+      key: 'componentWillMount',
+      value: function componentWillMount() {
+        _storesCommonStore2['default'].onChange(this.onChange, this);
+      }
+    }, {
+      key: 'onChange',
+      value: function onChange() {
+        this.render();
+      }
+    }, {
+      key: 'render',
+      value: function render() {
+        this.toggleCSSClass('display-none');
+      }
+    }]);
+  
+    return Spinner;
+  })();
   
   exports['default'] = Spinner;
   module.exports = exports['default'];
@@ -17947,10 +17968,10 @@
         this.componentData[key] = data;
       },
       setCSSClass: function setCSSClass(class_name) {
-        if (!this.elem.contains(class_name)) this.elem.classList.add(class_name);
+        if (!this.elem.classList.contains(class_name)) this.elem.classList.add(class_name);
       },
       unsetCSSClass: function unsetCSSClass(class_name) {
-        if (!this.elem.contains(class_name)) this.elem.classList.remove(class_name);
+        if (!this.elem.classList.contains(class_name)) this.elem.classList.remove(class_name);
       },
       toggleCSSClass: function toggleCSSClass(class_name) {
         this.elem.classList.toggle(class_name);
@@ -18014,7 +18035,7 @@
   
   
   // module
-  exports.push([module.id, ".display-none {\n  display: none; }\n\n.spinner {\n  width: 40px;\n  height: 40px;\n  background-color: #333;\n  margin: 100px auto;\n  -webkit-animation: sk-rotateplane 1.2s infinite ease-in-out;\n  animation: sk-rotateplane 1.2s infinite ease-in-out; }\n\n@-webkit-keyframes sk-rotateplane {\n  0% {\n    -webkit-transform: perspective(120px); }\n  50% {\n    -webkit-transform: perspective(120px) rotateY(180deg); }\n  100% {\n    -webkit-transform: perspective(120px) rotateY(180deg) rotateX(180deg); } }\n\n@keyframes sk-rotateplane {\n  0% {\n    transform: perspective(120px) rotateX(0deg) rotateY(0deg);\n    -webkit-transform: perspective(120px) rotateX(0deg) rotateY(0deg); }\n  50% {\n    transform: perspective(120px) rotateX(-180.1deg) rotateY(0deg);\n    -webkit-transform: perspective(120px) rotateX(-180.1deg) rotateY(0deg); }\n  100% {\n    transform: perspective(120px) rotateX(-180deg) rotateY(-179.9deg);\n    -webkit-transform: perspective(120px) rotateX(-180deg) rotateY(-179.9deg); } }\n\n.btn-in-cart span {\n  border: 1px solid #009EFF !important;\n  background: #009EFF !important; }\n", ""]);
+  exports.push([module.id, ".display-none {\n  display: none; }\n\n.spinner {\n  width: 40px;\n  height: 40px;\n  background-color: #333;\n  margin: 100px auto;\n  -webkit-animation: sk-rotateplane 1.2s infinite ease-in-out;\n  animation: sk-rotateplane 1.2s infinite ease-in-out; }\n\n@-webkit-keyframes sk-rotateplane {\n  0% {\n    -webkit-transform: perspective(120px); }\n  50% {\n    -webkit-transform: perspective(120px) rotateY(180deg); }\n  100% {\n    -webkit-transform: perspective(120px) rotateY(180deg) rotateX(180deg); } }\n\n@keyframes sk-rotateplane {\n  0% {\n    transform: perspective(120px) rotateX(0deg) rotateY(0deg);\n    -webkit-transform: perspective(120px) rotateX(0deg) rotateY(0deg); }\n  50% {\n    transform: perspective(120px) rotateX(-180.1deg) rotateY(0deg);\n    -webkit-transform: perspective(120px) rotateX(-180.1deg) rotateY(0deg); }\n  100% {\n    transform: perspective(120px) rotateX(-180deg) rotateY(-179.9deg);\n    -webkit-transform: perspective(120px) rotateX(-180deg) rotateY(-179.9deg); } }\n\n.btn-in-cart span {\n  background: #009EFF !important; }\n", ""]);
   
   // exports
 
@@ -18887,17 +18908,17 @@
   var jade = __webpack_require__(74);
   
   module.exports = function template(locals) {
-  var jade_debug = [ new jade.DebugItem( 1, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/AddToCartButton/AddToCartButton.jade" ) ];
+  var jade_debug = [ new jade.DebugItem( 1, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/AddToCartButton/AddToCartButton.jade" ) ];
   try {
   var buf = [];
   var jade_mixins = {};
   var jade_interp;
   ;var locals_for_with = (locals || {});(function (qty) {
-  jade_debug.unshift(new jade.DebugItem( 0, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/AddToCartButton/AddToCartButton.jade" ));
-  jade_debug.unshift(new jade.DebugItem( 1, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/AddToCartButton/AddToCartButton.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 0, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/AddToCartButton/AddToCartButton.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 1, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/AddToCartButton/AddToCartButton.jade" ));
   buf.push("<span>");
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
-  jade_debug.unshift(new jade.DebugItem( 2, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/AddToCartButton/AddToCartButton.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 2, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/AddToCartButton/AddToCartButton.jade" ));
   buf.push("<span>");
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
   jade_debug.unshift(new jade.DebugItem( 2, jade_debug[0].filename ));
@@ -18922,20 +18943,20 @@
   var jade = __webpack_require__(74);
   
   module.exports = function template(locals) {
-  var jade_debug = [ new jade.DebugItem( 1, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ) ];
+  var jade_debug = [ new jade.DebugItem( 1, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ) ];
   try {
   var buf = [];
   var jade_mixins = {};
   var jade_interp;
   ;var locals_for_with = (locals || {});(function (qty, response, total, undefined) {
-  jade_debug.unshift(new jade.DebugItem( 0, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
-  jade_debug.unshift(new jade.DebugItem( 1, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 0, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 1, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<div class=\"block-title odd\">");
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
-  jade_debug.unshift(new jade.DebugItem( 2, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 2, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<strong>");
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
-  jade_debug.unshift(new jade.DebugItem( 3, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 3, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<span>");
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
   jade_debug.unshift(new jade.DebugItem( 3, jade_debug[0].filename ));
@@ -18950,22 +18971,22 @@
   jade_debug.shift();
   buf.push("</div>");
   jade_debug.shift();
-  jade_debug.unshift(new jade.DebugItem( 4, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 4, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<div class=\"block-content last even\">");
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
-  jade_debug.unshift(new jade.DebugItem( 5, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 5, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<div class=\"summary\">");
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
-  jade_debug.unshift(new jade.DebugItem( 6, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 6, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<p class=\"amount\">");
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
-  jade_debug.unshift(new jade.DebugItem( 7, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 7, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("There are");
   jade_debug.shift();
-  jade_debug.unshift(new jade.DebugItem( 8, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 8, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<a href=\"http://magento-js-components.dev/index.php/checkout/cart/\">");
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
-  jade_debug.unshift(new jade.DebugItem( 9, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 9, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<span>");
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
   jade_debug.unshift(new jade.DebugItem( 9, jade_debug[0].filename ));
@@ -18974,13 +18995,13 @@
   jade_debug.shift();
   buf.push("</span>");
   jade_debug.shift();
-  jade_debug.unshift(new jade.DebugItem( 10, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 10, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<span>" + (jade.escape(null == (jade_interp = qty) ? "" : jade_interp)));
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
   jade_debug.shift();
   buf.push("</span>");
   jade_debug.shift();
-  jade_debug.unshift(new jade.DebugItem( 11, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 11, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<span>");
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
   jade_debug.unshift(new jade.DebugItem( 11, jade_debug[0].filename ));
@@ -18989,7 +19010,7 @@
   jade_debug.shift();
   buf.push("</span>");
   jade_debug.shift();
-  jade_debug.unshift(new jade.DebugItem( 12, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 12, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<span>");
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
   jade_debug.unshift(new jade.DebugItem( 12, jade_debug[0].filename ));
@@ -19001,16 +19022,16 @@
   jade_debug.shift();
   buf.push("</a>");
   jade_debug.shift();
-  jade_debug.unshift(new jade.DebugItem( 13, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 13, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push(" in your cart.");
   jade_debug.shift();
   jade_debug.shift();
   buf.push("</p>");
   jade_debug.shift();
-  jade_debug.unshift(new jade.DebugItem( 14, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 14, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<p class=\"subtotal\">");
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
-  jade_debug.unshift(new jade.DebugItem( 15, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 15, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<span class=\"label\">");
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
   jade_debug.unshift(new jade.DebugItem( 15, jade_debug[0].filename ));
@@ -19019,10 +19040,10 @@
   jade_debug.shift();
   buf.push("</span>");
   jade_debug.shift();
-  jade_debug.unshift(new jade.DebugItem( 16, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 16, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<span class=\"price\">");
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
-  jade_debug.unshift(new jade.DebugItem( 17, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 17, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<span>");
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
   jade_debug.unshift(new jade.DebugItem( 17, jade_debug[0].filename ));
@@ -19031,7 +19052,7 @@
   jade_debug.shift();
   buf.push("</span>");
   jade_debug.shift();
-  jade_debug.unshift(new jade.DebugItem( 18, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 18, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<span>" + (jade.escape(null == (jade_interp = total) ? "" : jade_interp)));
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
   jade_debug.shift();
@@ -19046,16 +19067,16 @@
   jade_debug.shift();
   buf.push("</div>");
   jade_debug.shift();
-  jade_debug.unshift(new jade.DebugItem( 19, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 19, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<div class=\"actions\">");
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
-  jade_debug.unshift(new jade.DebugItem( 20, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 20, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<button type=\"button\" title=\"Checkout\" onclick=\"setLocation('http://magento-js-components.dev/index.php/checkout/onepage/')\" class=\"button\">");
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
-  jade_debug.unshift(new jade.DebugItem( 21, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 21, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<span>");
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
-  jade_debug.unshift(new jade.DebugItem( 22, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 22, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<span>");
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
   jade_debug.unshift(new jade.DebugItem( 22, jade_debug[0].filename ));
@@ -19073,7 +19094,7 @@
   jade_debug.shift();
   buf.push("</div>");
   jade_debug.shift();
-  jade_debug.unshift(new jade.DebugItem( 23, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 23, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<p class=\"block-subtitle\">");
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
   jade_debug.unshift(new jade.DebugItem( 23, jade_debug[0].filename ));
@@ -19082,10 +19103,10 @@
   jade_debug.shift();
   buf.push("</p>");
   jade_debug.shift();
-  jade_debug.unshift(new jade.DebugItem( 24, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 24, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<ol id=\"cart-sidebar\" class=\"mini-products-list\">");
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
-  jade_debug.unshift(new jade.DebugItem( 25, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 25, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   // iterate response
   ;(function(){
     var $$obj = response;
@@ -19094,23 +19115,23 @@
       for (var $index = 0, $$l = $$obj.length; $index < $$l; $index++) {
         var item = $$obj[$index];
   
-  jade_debug.unshift(new jade.DebugItem( 25, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
-  jade_debug.unshift(new jade.DebugItem( 26, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 25, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 26, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<li class=\"item\">");
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
-  jade_debug.unshift(new jade.DebugItem( 27, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 27, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<a" + (jade.attr("href", item.url, true, false)) + (jade.attr("title", item.name, true, false)) + " class=\"product-image\">");
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
-  jade_debug.unshift(new jade.DebugItem( 28, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 28, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<img" + (jade.attr("src", item.image, true, false)) + " width=\"50\" height=\"50\"" + (jade.attr("al", item.name, true, false)) + "/>");
   jade_debug.shift();
   jade_debug.shift();
   buf.push("</a>");
   jade_debug.shift();
-  jade_debug.unshift(new jade.DebugItem( 29, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 29, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<div class=\"product-details\">");
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
-  jade_debug.unshift(new jade.DebugItem( 30, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 30, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<a href=\"#\" title=\"Remove This Item\" onclick=\"return confirm('Are you sure you would like to remove this item from the shopping cart?');\" class=\"btn-remove\">");
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
   jade_debug.unshift(new jade.DebugItem( 30, jade_debug[0].filename ));
@@ -19119,7 +19140,7 @@
   jade_debug.shift();
   buf.push("</a>");
   jade_debug.shift();
-  jade_debug.unshift(new jade.DebugItem( 31, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 31, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<a href=\"#\" title=\"Edit item\" class=\"btn-edit\">");
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
   jade_debug.unshift(new jade.DebugItem( 31, jade_debug[0].filename ));
@@ -19128,13 +19149,13 @@
   jade_debug.shift();
   buf.push("</a>");
   jade_debug.shift();
-  jade_debug.unshift(new jade.DebugItem( 32, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 32, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<p class=\"product-name\">");
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
-  jade_debug.unshift(new jade.DebugItem( 33, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 33, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<a" + (jade.attr("href", item.url, true, false)) + ">");
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
-  jade_debug.unshift(new jade.DebugItem( 34, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 34, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<span>" + (jade.escape(null == (jade_interp = item.name) ? "" : jade_interp)));
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
   jade_debug.shift();
@@ -19146,16 +19167,16 @@
   jade_debug.shift();
   buf.push("</p>");
   jade_debug.shift();
-  jade_debug.unshift(new jade.DebugItem( 35, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 35, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<strong>");
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
-  jade_debug.unshift(new jade.DebugItem( 36, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 36, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<span>" + (jade.escape(null == (jade_interp = item.qty) ? "" : jade_interp)));
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
   jade_debug.shift();
   buf.push("</span>");
   jade_debug.shift();
-  jade_debug.unshift(new jade.DebugItem( 37, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 37, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<span>");
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
   jade_debug.unshift(new jade.DebugItem( 37, jade_debug[0].filename ));
@@ -19164,10 +19185,10 @@
   jade_debug.shift();
   buf.push("</span>");
   jade_debug.shift();
-  jade_debug.unshift(new jade.DebugItem( 38, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 38, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<span class=\"price\">");
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
-  jade_debug.unshift(new jade.DebugItem( 39, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 39, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<span>");
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
   jade_debug.unshift(new jade.DebugItem( 39, jade_debug[0].filename ));
@@ -19176,7 +19197,7 @@
   jade_debug.shift();
   buf.push("</span>");
   jade_debug.shift();
-  jade_debug.unshift(new jade.DebugItem( 40, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 40, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<span>");
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
   jade_debug.unshift(new jade.DebugItem( 40, jade_debug[0].filename ));
@@ -19185,7 +19206,7 @@
   jade_debug.shift();
   buf.push("</span>");
   jade_debug.shift();
-  jade_debug.unshift(new jade.DebugItem( 41, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 41, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<span>" + (jade.escape(null == (jade_interp = item.price) ? "" : jade_interp)));
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
   jade_debug.shift();
@@ -19211,23 +19232,23 @@
       for (var $index in $$obj) {
         $$l++;      var item = $$obj[$index];
   
-  jade_debug.unshift(new jade.DebugItem( 25, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
-  jade_debug.unshift(new jade.DebugItem( 26, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 25, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 26, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<li class=\"item\">");
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
-  jade_debug.unshift(new jade.DebugItem( 27, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 27, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<a" + (jade.attr("href", item.url, true, false)) + (jade.attr("title", item.name, true, false)) + " class=\"product-image\">");
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
-  jade_debug.unshift(new jade.DebugItem( 28, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 28, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<img" + (jade.attr("src", item.image, true, false)) + " width=\"50\" height=\"50\"" + (jade.attr("al", item.name, true, false)) + "/>");
   jade_debug.shift();
   jade_debug.shift();
   buf.push("</a>");
   jade_debug.shift();
-  jade_debug.unshift(new jade.DebugItem( 29, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 29, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<div class=\"product-details\">");
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
-  jade_debug.unshift(new jade.DebugItem( 30, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 30, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<a href=\"#\" title=\"Remove This Item\" onclick=\"return confirm('Are you sure you would like to remove this item from the shopping cart?');\" class=\"btn-remove\">");
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
   jade_debug.unshift(new jade.DebugItem( 30, jade_debug[0].filename ));
@@ -19236,7 +19257,7 @@
   jade_debug.shift();
   buf.push("</a>");
   jade_debug.shift();
-  jade_debug.unshift(new jade.DebugItem( 31, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 31, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<a href=\"#\" title=\"Edit item\" class=\"btn-edit\">");
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
   jade_debug.unshift(new jade.DebugItem( 31, jade_debug[0].filename ));
@@ -19245,13 +19266,13 @@
   jade_debug.shift();
   buf.push("</a>");
   jade_debug.shift();
-  jade_debug.unshift(new jade.DebugItem( 32, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 32, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<p class=\"product-name\">");
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
-  jade_debug.unshift(new jade.DebugItem( 33, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 33, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<a" + (jade.attr("href", item.url, true, false)) + ">");
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
-  jade_debug.unshift(new jade.DebugItem( 34, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 34, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<span>" + (jade.escape(null == (jade_interp = item.name) ? "" : jade_interp)));
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
   jade_debug.shift();
@@ -19263,16 +19284,16 @@
   jade_debug.shift();
   buf.push("</p>");
   jade_debug.shift();
-  jade_debug.unshift(new jade.DebugItem( 35, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 35, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<strong>");
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
-  jade_debug.unshift(new jade.DebugItem( 36, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 36, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<span>" + (jade.escape(null == (jade_interp = item.qty) ? "" : jade_interp)));
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
   jade_debug.shift();
   buf.push("</span>");
   jade_debug.shift();
-  jade_debug.unshift(new jade.DebugItem( 37, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 37, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<span>");
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
   jade_debug.unshift(new jade.DebugItem( 37, jade_debug[0].filename ));
@@ -19281,10 +19302,10 @@
   jade_debug.shift();
   buf.push("</span>");
   jade_debug.shift();
-  jade_debug.unshift(new jade.DebugItem( 38, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 38, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<span class=\"price\">");
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
-  jade_debug.unshift(new jade.DebugItem( 39, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 39, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<span>");
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
   jade_debug.unshift(new jade.DebugItem( 39, jade_debug[0].filename ));
@@ -19293,7 +19314,7 @@
   jade_debug.shift();
   buf.push("</span>");
   jade_debug.shift();
-  jade_debug.unshift(new jade.DebugItem( 40, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 40, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<span>");
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
   jade_debug.unshift(new jade.DebugItem( 40, jade_debug[0].filename ));
@@ -19302,7 +19323,7 @@
   jade_debug.shift();
   buf.push("</span>");
   jade_debug.shift();
-  jade_debug.unshift(new jade.DebugItem( 41, "/home/bat/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
+  jade_debug.unshift(new jade.DebugItem( 41, "/home/denis/magento_projects/magento-js-components.dev/client/src/components/common/CartSidebar/CartSidebar.jade" ));
   buf.push("<span>" + (jade.escape(null == (jade_interp = item.price) ? "" : jade_interp)));
   jade_debug.unshift(new jade.DebugItem( undefined, jade_debug[0].filename ));
   jade_debug.shift();
@@ -20834,8 +20855,8 @@
   
       _lodash2['default'].assign(this, options);
       this.elem.addEventListener('change', this.change.bind(this));
-      _storesCommonStore2['default'].cartChangeSubscription(this);
       this.getInitComponentData();
+      this.componentWillMount();
     }
   
     _createClass(InputQty, [{
@@ -20847,6 +20868,17 @@
       key: 'getInitComponentData',
       value: function getInitComponentData() {
         this.setComponentData('qty', _storesCommonStore2['default'].getQty());
+      }
+    }, {
+      key: 'componentWillMount',
+      value: function componentWillMount() {
+        _storesCommonStore2['default'].onChange(this.onChange, this);
+      }
+    }, {
+      key: 'onChange',
+      value: function onChange() {
+        this.setComponentData('qty', _storesCommonStore2['default'].getQty());
+        this.render();
       }
     }, {
       key: 'render',

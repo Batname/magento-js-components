@@ -8,11 +8,18 @@ import template from './CartSidebar.jade';
 class CartSidebar{
   constructor(options){
     _.assign(this, options);
-    CommonStore.cartChangeSubscription(this);
-    CommonStore.loaderSubscription(this);
-    CommonStore.loadedSubscription(this);
+    this.componentWillMount();
+  }
+  componentWillMount() {
+    CommonStore.onChange(this.onChange, this);
+  }
+  onChange(){
+    this.setComponentData('qty', CommonStore.getQty());
+    this.setComponentData('cart', CommonStore.getCartData());
+    this.render();
   }
   render(){
+    this.toggleCSSClass('display-none');
     let totals = {
       qty: _.chain(this.componentData.cart.response).pluck('qty').sum().value(),
       total: _.chain(this.componentData.cart.response).map((item) => item.qty * item.price).sum().round(2).value(),
