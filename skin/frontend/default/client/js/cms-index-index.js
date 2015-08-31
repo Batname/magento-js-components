@@ -57,6 +57,9 @@
   var MyClass = (function () {
     function MyClass() {
       _classCallCheck(this, _MyClass);
+  
+      this.firstName = 'Denis';
+      this.lastName = 'Dubinin';
     }
   
     var _MyClass = MyClass;
@@ -73,6 +76,7 @@
   
   var my = new MyClass();
   
+  console.log(my, 'my');
   console.log(my.annotated, 'my.annotated');
   console.log(MyClass['static'], 'MyClass.static');
   

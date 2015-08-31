@@ -1,5 +1,10 @@
 @simpleDecorete(true)
-class MyClass {}
+class MyClass {
+  constructor(){
+    this.firstName = 'Denis';
+    this.lastName = 'Dubinin';
+  }
+}
 
 function simpleDecorete(value) {
   return (target) => {
@@ -10,6 +15,7 @@ function simpleDecorete(value) {
 
 let my = new MyClass();
 
+console.log(my, 'my');
 console.log(my.annotated, 'my.annotated');
 console.log(MyClass.static, 'MyClass.static');
 
