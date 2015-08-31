@@ -1,7 +1,7 @@
 {
   "name": "client",
   "version": "1.0.0",
-  "description": "",
+  "description": "Magento components arcitecture",
   "main": "index.js",
   "scripts": {
     "build:watch:release": "gulp build:watch --release",
