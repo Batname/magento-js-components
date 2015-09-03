@@ -21,4 +21,11 @@
       </block>
     </reference>
   </catalog_product_view>
+  <customer_account_login>
+    <reference name="before_body_end">
+      <block type="page/html_head" name="customJs" as="customJs" after="-" template="customJs.phtml">
+          <action method="addItem"><type>skin_js</type><name>js/customer-account-login.js</name></action>
+      </block>
+    </reference>
+  </customer_account_login>
 </layout>
