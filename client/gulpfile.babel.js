@@ -23,6 +23,9 @@ gulp.task('webpack', lazyRequireTask('./tasks/webpack', webpackConfig));
 // Nginx config
 gulp.task('config:nginx', lazyRequireTask('./tasks/configNginx', {plagins:plagins}));
 
+// Tests
+const mochaConfig = {path: ['test/unit/*', 'test/e2e/*']};
+gulp.task('test', lazyRequireTask('./tasks/mocha', mochaConfig));
 
 // Build and start watching for modifications
 gulp.task('build:watch', cb => {
